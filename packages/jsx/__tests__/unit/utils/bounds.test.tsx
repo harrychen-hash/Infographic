@@ -631,6 +631,23 @@ describe('bounds utils', () => {
         height: 60, // 从25到85(70+15)
       });
     });
+
+    it('extra case 1', () => {
+      const Node = (props) => {
+        return (
+          <Group {...props}>
+            <Rect width={30} height={30} />
+            <Rect x={50} width={100} height={30} />
+          </Group>
+        );
+      };
+      expect(getElementBounds(<Node y={100} />)).toEqual({
+        x: 0,
+        y: 100,
+        width: 150,
+        height: 30,
+      });
+    });
   });
 
   describe('getCombinedBounds', () => {

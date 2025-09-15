@@ -128,10 +128,15 @@ export function getElementBounds(node?: JSXNode): Bounds {
       const jsxChildren = children.flatMap((child) => nodeToElements(child));
       const innerHasChildren = jsxChildren.length > 0;
 
+      const innerHasSamePosition =
+        innerElement.props &&
+        innerElement.props.x === props.x &&
+        innerElement.props.y === props.y;
+
       if (innerHasExplicitSize) {
         return {
-          x: externalX + innerBounds.x,
-          y: externalY + innerBounds.y,
+          x: innerHasSamePosition ? innerBounds.x : externalX + innerBounds.x,
+          y: innerHasSamePosition ? innerBounds.y : externalY + innerBounds.y,
           width: innerBounds.width,
           height: innerBounds.height,
         };
@@ -140,15 +145,15 @@ export function getElementBounds(node?: JSXNode): Bounds {
       if (isNumber(externalWidth) && isNumber(externalHeight)) {
         if (innerHasChildren) {
           return {
-            x: externalX,
-            y: externalY,
+            x: innerHasSamePosition ? innerBounds.x : externalX,
+            y: innerHasSamePosition ? innerBounds.y : externalY,
             width: externalWidth,
             height: externalHeight,
           };
         } else {
           return {
-            x: externalX + innerBounds.x,
-            y: externalY + innerBounds.y,
+            x: innerHasSamePosition ? innerBounds.x : externalX + innerBounds.x,
+            y: innerHasSamePosition ? innerBounds.y : externalY + innerBounds.y,
             width: externalWidth,
             height: externalHeight,
           };
@@ -161,8 +166,8 @@ export function getElementBounds(node?: JSXNode): Bounds {
         innerBounds.height !== 0 ? innerBounds.height : (externalHeight ?? 0);
 
       return {
-        x: externalX + innerBounds.x,
-        y: externalY + innerBounds.y,
+        x: innerHasSamePosition ? innerBounds.x : externalX + innerBounds.x,
+        y: innerHasSamePosition ? innerBounds.y : externalY + innerBounds.y,
         width,
         height,
       };
