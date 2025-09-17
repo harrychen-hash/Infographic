@@ -1,14 +1,8 @@
-import path from 'path';
+import tsconfigPaths from 'vite-tsconfig-paths';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  resolve: {
-    alias: {
-      '@antv/infographic': path.resolve(__dirname, './src/index.ts'),
-      '@': path.resolve(__dirname, './src'),
-      '@@': path.resolve(__dirname, './__tests__'),
-    },
-  },
+  plugins: [tsconfigPaths()],
   test: {
     environment: 'jsdom',
     coverage: {
