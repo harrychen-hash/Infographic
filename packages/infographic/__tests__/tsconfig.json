@@ -6,12 +6,12 @@
     "noEmit": true,
     "composite": false,
     "paths": {
-      "@antv/infographic-jsx": ["../src/index"],
-      "@antv/infographic-jsx/*": ["../src/*"],
-      "@@/*": ["./*"]
+      "@antv/infographic": ["../src/index"],
+      "@@/*": ["./*"],
+      "@/*": ["../src/*"]
     }
   },
-  "include": ["./**/*", "../src/global.d.ts"],
+  "include": ["./**/*"],
   "exclude": ["node_modules"],
   "references": [{ "path": ".." }]
 }

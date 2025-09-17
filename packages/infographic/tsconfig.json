@@ -9,7 +9,8 @@
     "composite": true,
     "paths": {
       "@antv/infographic-jsx": ["../jsx/src"],
-      "@antv/infographic-jsx/*": ["../jsx/src/*"]
+      "@antv/infographic-jsx/*": ["../jsx/src/*"],
+      "@antv/infographic": ["./src/index"]
     }
   },
   "include": ["src/**/*"],
