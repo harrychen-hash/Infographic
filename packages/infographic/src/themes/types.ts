@@ -30,3 +30,26 @@ export interface ThemeConfig {
   stylize?: StylizeConfig | null;
   elements?: Record<string, ShapeAttributes | TextAttributes>;
 }
+
+export interface ThemeSeed {
+  colorPrimary: string;
+  colorBg?: string;
+  isDarkMode?: boolean;
+}
+
+export interface ThemeColors {
+  /** 原始主色 */
+  colorPrimary: string;
+  /** 主色浅色背景 */
+  colorPrimaryBg: string;
+  /** 主色背景上的文本颜色 */
+  colorPrimaryText: string;
+  /** 最深文本颜色 */
+  colorText: string;
+  /** 次要文本颜色 */
+  colorTextSecondary: string;
+  /** 纯白色 */
+  colorWhite: string;
+  /** 背景色 */
+  colorBg: string;
+}
