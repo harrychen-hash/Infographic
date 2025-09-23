@@ -2,6 +2,7 @@
 import { ComponentType, getElementBounds, Group } from '@antv/infographic-jsx';
 import { ItemDesc, ItemIcon, ItemLabel } from '../components';
 import { FlexLayout } from '../layouts';
+import { registerItem } from './registry';
 import type { BaseItemProps } from './types';
 import { getItemProps } from './utils';
 
@@ -193,3 +194,5 @@ export const SimpleItem: ComponentType<SimpleItemProps> = (props) => {
     return 'center';
   }
 };
+
+registerItem('simple', { component: SimpleItem });

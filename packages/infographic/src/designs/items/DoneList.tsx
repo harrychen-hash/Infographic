@@ -1,6 +1,7 @@
 /** @jsxImportSource @antv/infographic-jsx */
 import { ComponentType, Group, Path } from '@antv/infographic-jsx';
 import { ItemDesc } from '../components';
+import { registerItem } from './registry';
 import type { BaseItemProps } from './types';
 import { getItemId, getItemProps } from './utils';
 
@@ -60,3 +61,5 @@ export const DoneList: ComponentType<DoneListProps> = (props) => {
     </Group>
   );
 };
+
+registerItem('done-list', { component: DoneList });

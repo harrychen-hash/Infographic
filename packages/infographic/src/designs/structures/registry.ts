@@ -1,4 +1,3 @@
-import { ListColumn } from './list-column';
 import type { Structure } from './types';
 
 const STRUCTURE_REGISTRY = new Map<string, Structure>();
@@ -11,4 +10,6 @@ export function getStructure(type: string): Structure | undefined {
   return STRUCTURE_REGISTRY.get(type);
 }
 
-registerStructure('list-column', { component: ListColumn });
+export function getStructures(): string[] {
+  return Array.from(STRUCTURE_REGISTRY.keys());
+}

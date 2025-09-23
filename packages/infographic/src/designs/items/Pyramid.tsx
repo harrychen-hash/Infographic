@@ -11,6 +11,7 @@ import {
 import roundPolygon, { getSegments } from 'round-polygon';
 import tinycolor from 'tinycolor2';
 import { ItemDesc, ItemIcon, ItemLabel } from '../components';
+import { registerItem } from './registry';
 import type { BaseItemProps } from './types';
 import { getItemId, getItemProps } from './utils';
 
@@ -173,3 +174,5 @@ function calculateTriangleSegment(
 
   return { points, topWidth, bottomWidth };
 }
+
+registerItem('pyramid', { component: Pyramid });
