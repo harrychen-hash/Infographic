@@ -50,8 +50,8 @@ function processElement(element: JSXNode, context: RenderContext): JSXNode {
   // process Defs, collect defs content
   if (element.type === DefsSymbol) {
     children.forEach((child) => {
-      if (typeof child === 'object') {
-        context.defs.push(child);
+      if (typeof child === 'object' && child.props.id) {
+        context.defs.set(child.props.id, child);
       }
     });
     return null;
@@ -143,8 +143,11 @@ export function renderSVG(element: JSXNode, props: SVGProps = {}): string {
   }
 
   const attrs = renderAttrs(finalProps);
-  const defsContent = context.defs.length
-    ? `<defs>${context.defs.map((def) => render(def, context)).join('')}</defs>`
+
+  const defsContent = context.defs.size
+    ? `<defs>${Array.from(context.defs.values())
+        .map((def) => render(def, context))
+        .join('')}</defs>`
     : '';
   return `<svg${attrs}>${defsContent}${content}</svg>`;
 }
