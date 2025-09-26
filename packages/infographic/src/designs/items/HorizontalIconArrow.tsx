@@ -1,0 +1,221 @@
+/** @jsxImportSource @antv/infographic-jsx */
+import {
+  Bounds,
+  ComponentType,
+  Ellipse,
+  getElementBounds,
+  Group,
+  Path,
+  Polygon,
+  Text,
+} from '@antv/infographic-jsx';
+import { Gap, ItemDesc, ItemIconCircle, ItemLabel } from '../components';
+import { FlexLayout } from '../layouts';
+import { AlignLayout } from '../layouts/Align';
+import { registerItem } from './registry';
+import type { BaseItemProps } from './types';
+import { getItemProps } from './utils';
+
+export interface HorizontalIconArrowProps extends BaseItemProps {
+  width?: number;
+  /** 翻转方向 */
+  flipped?: boolean;
+}
+
+export const HorizontalIconArrow: ComponentType<HorizontalIconArrowProps> = (
+  props,
+) => {
+  const [{ indexes, datum, width = 140, themeColors, flipped }, restProps] =
+    getItemProps(props, ['width', 'flipped']);
+
+  const positionV = indexes[0] % 2 === (flipped ? 0 : 1) ? 'normal' : 'flipped';
+
+  const textAlignVertical = positionV === 'normal' ? 'bottom' : 'top';
+  const label = (
+    <ItemLabel
+      indexes={indexes}
+      width={width}
+      fill={themeColors.colorText}
+      alignHorizontal="center"
+      alignVertical={textAlignVertical}
+      fontSize={14}
+    >
+      {datum.label}
+    </ItemLabel>
+  );
+  const desc = (
+    <ItemDesc
+      indexes={indexes}
+      width={width}
+      fill={themeColors.colorTextSecondary}
+      alignHorizontal="center"
+      alignVertical={textAlignVertical}
+    >
+      {datum.desc}
+    </ItemDesc>
+  );
+  const icon = (
+    <ItemIconCircle
+      indexes={indexes}
+      fill={themeColors.colorPrimary}
+      colorBg={themeColors.colorWhite}
+    />
+  );
+  const dotLine = (
+    <DotLine
+      width={8}
+      height={30}
+      fill={themeColors.colorPrimary}
+      positionV={positionV}
+    />
+  );
+
+  const dotLineGap = 5;
+  const iconGap = 25;
+  const arrowHeight = 30;
+  const labelBounds = getElementBounds(label);
+  const descBounds = getElementBounds(desc);
+  const iconBounds = getElementBounds(icon);
+  const dotLineBounds = getElementBounds(dotLine);
+  const fixedGap =
+    labelBounds.height +
+    descBounds.height +
+    dotLineGap +
+    dotLineBounds.height -
+    iconBounds.height -
+    iconGap;
+
+  const totalHeight =
+    iconBounds.height +
+    iconGap +
+    arrowHeight +
+    dotLineBounds.height +
+    dotLineGap +
+    labelBounds.height +
+    descBounds.height;
+
+  return (
+    <Group width={width} height={totalHeight} {...restProps}>
+      <FlexLayout flexDirection="column" alignItems="center">
+        {positionV === 'normal' ? (
+          <>
+            {desc}
+            {label}
+            <Gap height={dotLineGap} />
+            {dotLine}
+          </>
+        ) : (
+          <>
+            <Gap height={fixedGap} />
+            {icon}
+            <Gap height={iconGap} />
+          </>
+        )}
+        <AlignLayout horizontal="center" vertical="center">
+          <VerticalArrow
+            width={width}
+            height={arrowHeight}
+            fill={themeColors.colorPrimary}
+          />
+          <Text
+            width={width}
+            height={arrowHeight}
+            alignHorizontal="center"
+            alignVertical="center"
+            fill={themeColors.colorWhite}
+            fontWeight="bold"
+            fontSize={16}
+          >
+            {String(indexes[0] + 1)
+              .padStart(2, '0')
+              .slice(-2)}
+          </Text>
+        </AlignLayout>
+        {positionV === 'flipped' ? (
+          <>
+            {dotLine}
+            <Gap height={dotLineGap} />
+            {label}
+            {desc}
+          </>
+        ) : (
+          <>
+            <Gap height={iconGap} />
+            {icon}
+          </>
+        )}
+      </FlexLayout>
+    </Group>
+  );
+};
+
+const VerticalArrow = (
+  props: Partial<Bounds> & { fill: string; size?: number },
+) => {
+  const {
+    x = 0,
+    y = 0,
+    width = 100,
+    height = 40,
+    fill = '#1890FF',
+    size = 10,
+  } = props;
+  return (
+    <Polygon
+      width={width}
+      height={height}
+      points={[
+        { x, y },
+        { x: x + width - size, y },
+        { x: x + width, y: y + height / 2 },
+        { x: x + width - size, y: y + height },
+        { x, y: y + height },
+        { x: x + size, y: y + height / 2 },
+      ]}
+      fill={fill}
+    />
+  );
+};
+
+const DotLine = (props: {
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+  fill: string;
+  positionV?: 'normal' | 'flipped';
+}) => {
+  const {
+    x = 0,
+    y = 0,
+    width = 10,
+    height = 50,
+    fill,
+    positionV = 'top',
+  } = props;
+  const r = width / 2;
+  const lineLength = height - r;
+  const strokeWidth = 2;
+  const lineX = r;
+  return (
+    <Group x={x} y={y} width={width} height={height}>
+      <Ellipse
+        width={width}
+        height={width}
+        fill={fill}
+        y={positionV === 'top' ? 0 : lineLength - r}
+      />
+      <Path
+        d={
+          positionV === 'top'
+            ? `M${lineX},${r} L${lineX},${r + lineLength}`
+            : `M${lineX},0 L${lineX},${lineLength - r}`
+        }
+        strokeWidth={strokeWidth}
+        stroke={fill}
+      />
+    </Group>
+  );
+};
+
+registerItem('horizontal-icon-arrow', { component: HorizontalIconArrow });
