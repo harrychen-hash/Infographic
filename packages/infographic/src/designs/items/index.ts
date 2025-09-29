@@ -14,6 +14,8 @@ export * from './Pyramid';
 export * from './registry';
 export * from './RibbonCard';
 export * from './RoundedRectNode';
+export * from './SimpleHorizontalArrow';
 export * from './SimpleItem';
+export * from './SimpleVerticalArrow';
 export type * from './types';
 export * from './VerticalIconArrow';
