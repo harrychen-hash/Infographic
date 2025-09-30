@@ -1,10 +1,13 @@
 export * from '@antv/infographic-jsx';
 export * from './designs';
 export { getItemId, getItemProps } from './designs/utils/item';
-export type * from './options/types';
+export type { InfographicOptions, ParsedInfographicOptions } from './options';
 export * from './renderer';
 export { loadSVGResource, registerResourceLoader } from './resource';
-export * from './runtime';
-export * from './templates';
+export { Infographic } from './runtime';
+export { getTemplate, getTemplates, registerTemplate } from './templates';
+export type { ParsedTemplateOptions, TemplateOptions } from './templates';
+export { getTheme, getThemes, registerTheme } from './themes';
+export type { ThemeColors, ThemeConfig, ThemeSeed } from './themes';
 export type * from './types';
 export { parseSVG } from './utils';

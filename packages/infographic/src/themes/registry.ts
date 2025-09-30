@@ -9,3 +9,7 @@ export function registerTheme(name: string, theme: ThemeConfig) {
 export function getTheme(name: string): ThemeConfig | undefined {
   return THEME_REGISTRY.get(name);
 }
+
+export function getThemes(): string[] {
+  return Array.from(THEME_REGISTRY.keys());
+}

@@ -1,3 +1,4 @@
+import { registerPalette } from './registry';
 import type { Palette } from './types';
 
 export const antv: Palette = [
@@ -13,6 +14,7 @@ export const antv: Palette = [
   '#17C76F',
   '#70CAF8',
 ];
+registerPalette('antv', antv);
 
 export const spectral: Palette = (_, index, count) => {
   const colors = [
@@ -80,3 +82,5 @@ export const spectral: Palette = (_, index, count) => {
   const size = Math.min(Math.max(count, 3), 11);
   return colors[size - 3][index % size];
 };
+
+registerPalette('spectral', spectral);
