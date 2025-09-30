@@ -1,6 +1,6 @@
 {
   "name": "@alipay/infographic-dev",
-  "version": "0.0.1-beta.2",
+  "version": "0.0.1-beta.3",
   "description": "AntV Infographic generator and visualization library",
   "keywords": [
     "antv",
@@ -57,6 +57,6 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.antgroup-inc.cn/",
-    "tag": "beta"
+    "tag": "latest"
   }
 }
