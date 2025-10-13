@@ -36,7 +36,6 @@ export const Preview = () => {
             options={templates.map((value) => ({ label: value, value }))}
             onChange={(value) => {
               setTemplate(value);
-              console.log(value);
             }}
           />
         </Form.Item>
