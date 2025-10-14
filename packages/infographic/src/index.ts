@@ -6,5 +6,6 @@ export * from './renderer';
 export { loadSVGResource, registerResourceLoader } from './resource';
 export * from './runtime';
 export * from './templates';
+export * from './themes';
 export type * from './types';
 export { parseSVG } from './utils';
