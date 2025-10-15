@@ -50,40 +50,50 @@ export const HIERARCHY_DATA: Data = {
     {
       label: '用户调研',
       // desc: '通过用户调研，了解用户需求和痛点，指导产品设计和优化',
+      icon: '3d-file-015_v1_lineal',
       children: [
         {
           label: '用户为什么要使用某个音乐平台',
           desc: '用户为什么要使用某个音乐平台',
+          icon: 'company-021_v1_lineal',
           children: [
             {
               label: '用户从哪些渠道了解到这个平台',
+              icon: 'activities-037_v1_lineal',
             },
             {
               label: '这个平台是哪些方面吸引了用户',
+              icon: 'activities-037_v1_lineal',
             },
           ],
         },
         {
           label: '用户在什么场景下使用这个平台',
           desc: '用户在什么场景下使用这个平台',
+          icon: 'antenna-bars-5_v1_lineal',
           children: [
             {
               label: '用户从什么事件什么场景下使用',
+              icon: 'account-book-025_v1_lineal',
             },
             {
               label: '用户在某个场景下用到哪些功能',
+              icon: 'account-book-025_v1_lineal',
             },
           ],
         },
         {
           label: '用户什么原因下会离开这个平台',
           desc: '用户什么原因下会离开这个平台',
+          icon: 'achievment-050_v1_lineal',
           children: [
             {
               label: '用户无法接受这个平台的原因',
+              icon: 'account-book-025_v1_lineal',
             },
             {
               label: '用户觉得这个平台有哪些不足',
+              icon: 'account-book-025_v1_lineal',
             },
           ],
         },

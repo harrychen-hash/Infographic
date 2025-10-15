@@ -60,7 +60,7 @@ export const SequenceTimeline: ComponentType<SequenceTimelineProps> = (
   const decorElements: JSXElement[] = [];
 
   const stepLabelX = 10;
-  const timelineX = stepLabelX + 120 + 20;
+  const timelineX = stepLabelX + 70 + 10;
   const itemX = timelineX + 30;
   const nodeRadius = 6;
 
@@ -93,7 +93,7 @@ export const SequenceTimeline: ComponentType<SequenceTimelineProps> = (
       <Text
         x={stepLabelX}
         y={nodeY}
-        width={130}
+        width={70}
         fontSize={18}
         fontWeight="bold"
         alignHorizontal="left"

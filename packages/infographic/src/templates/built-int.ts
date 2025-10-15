@@ -24,7 +24,7 @@ const BUILT_IN_TEMPLATES: Record<string, TemplateOptions> = {
         flipLeaf: true,
         groupGap: -20,
       },
-      items: [{ type: 'circle-node' }, { type: 'plain-text' }],
+      items: [{ type: 'circle-node', width: 150 }, { type: 'plain-text' }],
     },
   },
   'hierarchy-pyramid-rounded-rect-node': {
@@ -68,7 +68,7 @@ const BUILT_IN_TEMPLATES: Record<string, TemplateOptions> = {
     design: {
       title: 'default',
       structure: { type: 'hierarchy-tree' },
-      items: [{ type: 'icon-badge' }],
+      items: [{ type: 'icon-badge', badgeSize: 0 }],
     },
   },
   'hierarchy-tree-pill-badge': {
@@ -243,7 +243,7 @@ const BUILT_IN_TEMPLATES: Record<string, TemplateOptions> = {
   'sequence-steps-simple': {
     design: {
       title: 'default',
-      structure: { type: 'sequence-steps' },
+      structure: { type: 'sequence-steps', gap: 10 },
       items: [{ type: 'simple' }],
     },
   },
@@ -271,7 +271,7 @@ const BUILT_IN_TEMPLATES: Record<string, TemplateOptions> = {
   'sequence-timeline-simple': {
     design: {
       title: 'default',
-      structure: { type: 'sequence-timeline' },
+      structure: { type: 'sequence-timeline', gap: 20 },
       items: [{ type: 'simple' }],
     },
   },

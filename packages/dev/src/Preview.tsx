@@ -3,6 +3,7 @@ import { Checkbox, Flex, Form, Select } from 'antd';
 import { useEffect, useState } from 'react';
 import { Infographic } from './Infographic';
 import { COMPARE_DATA, HIERARCHY_DATA, LIST_DATA } from './data';
+import { getSearchParam, setSearchParam } from './utils/search-params';
 
 const templates = getTemplates();
 
@@ -13,7 +14,9 @@ const DATA = {
 } as const;
 
 export const Preview = () => {
-  const [template, setTemplate] = useState(templates[0]);
+  const [template, setTemplate] = useState(
+    getSearchParam('template') || templates[0],
+  );
   const [themeConfig, setThemeConfig] = useState({});
   const [data, setData] = useState<keyof typeof DATA>('list');
 
@@ -37,6 +40,7 @@ export const Preview = () => {
             options={templates.map((value) => ({ label: value, value }))}
             onChange={(value) => {
               setTemplate(value);
+              setSearchParam('template', value);
             }}
           />
         </Form.Item>
