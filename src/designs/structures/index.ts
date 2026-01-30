@@ -1,5 +1,6 @@
 export * from './chart-bar';
 export * from './chart-column';
+export * from './chart-combo';
 export * from './chart-line';
 export * from './chart-pie';
 export * from './chart-wordcloud';

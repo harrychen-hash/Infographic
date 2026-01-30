@@ -31,6 +31,8 @@ ChartColumnTemplate = Literal["chart-column-simple"]
 
 ChartWordcloudTemplate = Literal["chart-wordcloud"]
 
+ChartComboTemplate = Literal["chart-combo"]
+
 
 @function_tool
 def chart_pie(
@@ -366,6 +368,110 @@ def chart_wordcloud(
     return TemplateSelection(
         category="chart",
         sub_category="chart-wordcloud",
+        template=template,
+        data=data,
+        rationale=rationale,
+    )
+
+
+@function_tool
+def chart_combo(
+    template: ChartComboTemplate,
+    data_json: str,
+    rationale: str,
+) -> TemplateSelection:
+    """选择 chart-combo 类型模板 - 双轴组合图（柱状图+折线图）。
+
+    ## 可用模板
+    - 由对应的 Literal 类型定义（与 getTemplates 对齐）
+
+    ## 适用场景
+    - 同一维度（如时间）下需要展示两个不同指标
+    - 主指标（绝对值）用柱状图，副指标（比率/增长率）用折线图
+    - 典型例子：营收 + 增长率、销量 + 转化率、成本 + 利润率
+
+    ## 不适用场景
+    - 两个指标没有共同的 X 轴维度
+    - 只有一个指标需要展示（用 chart-line 或 chart-column）
+    - 两个指标单位相同，无需双轴（用 chart-line 或 chart-column）
+
+    ## 与其他 chart 类型的区别
+    - chart-combo: 双轴组合，柱状图+折线图，两个不同单位的指标
+    - chart-line: 单轴折线，单一指标趋势
+    - chart-column: 单轴柱状，单一指标对比
+    - chart-bar: 横向条形，排名展示
+
+    ## 数据格式
+    {
+      "title": "<标题>",
+      "xTitle": "<X轴标题>",
+      "primaryYTitle": "<左Y轴标题>",
+      "secondaryYTitle": "<右Y轴标题>",
+      "primaryLabel": "<左轴图例>",
+      "secondaryLabel": "<右轴图例>",
+      "primaryMin": <左轴起始值>,
+      "primaryMax": <左轴最大值>,
+      "primaryStep": <左轴刻度间隔>,
+      "secondaryMin": <右轴起始值>,
+      "secondaryMax": <右轴最大值>,
+      "secondaryStep": <右轴刻度间隔>,
+      "primaryValues": [{"label": "<X轴标签>", "value": <主指标值>}...],
+      "secondaryValues": [{"label": "<X轴标签>", "value": <副指标值>}...]
+    }
+
+    Args:
+        template: 模板名称（必填），固定为 "chart-combo"
+        data_json: JSON 字符串（必填）。
+            格式: {"title": "<标题>", "primaryValues": [...], "secondaryValues": [...], ...}
+            规则:
+            - title 可选，用于图表标题（如"季度业绩对比"）
+            - xTitle 可选，X轴标题（如"季度"）
+            - primaryYTitle 可选，左Y轴标题（如"销售额 (万元)"）
+            - secondaryYTitle 可选，右Y轴标题（如"增长率 (%)"）
+            - primaryLabel 可选，左轴图例文字（如"销售额"），默认"销售额 (左轴)"
+            - secondaryLabel 可选，右轴图例文字（如"增长率"），默认"增长率 % (右轴)"
+            - primaryMin 可选，左轴起始值（默认0）
+            - primaryMax 可选，左轴最大值（默认自动计算）
+            - primaryStep 可选，左轴刻度间隔（默认自动计算，建议根据数据范围设置整数间隔）
+            - secondaryMin 可选，右轴起始值（默认0）
+            - secondaryMax 可选，右轴最大值（默认自动计算）
+            - secondaryStep 可选，右轴刻度间隔（默认自动计算，建议根据数据范围设置整数间隔）
+            - primaryValues 必填，柱状图数据数组，每项 {label, value}
+            - secondaryValues 必填，折线图数据数组，每项 {label, value}
+            - primaryValues 和 secondaryValues 的 label 必须一一对应
+            - values 数组 2-8 项
+            示例1: {"title": "季度业绩", "primaryValues": [{"label": "Q1", "value": 100}, {"label": "Q2", "value": 150}], "secondaryValues": [{"label": "Q1", "value": 10}, {"label": "Q2", "value": 25}], "primaryLabel": "营收", "secondaryLabel": "增长率", "primaryMax": 200, "primaryStep": 50, "secondaryMax": 40, "secondaryStep": 10}
+            示例2: {"title": "年度用户增长", "xTitle": "年份", "primaryYTitle": "用户数 (万)", "secondaryYTitle": "同比增长 (%)", "primaryValues": [{"label": "2022", "value": 120}, {"label": "2023", "value": 280}], "secondaryValues": [{"label": "2022", "value": 0}, {"label": "2023", "value": 133}], "primaryMax": 300, "primaryStep": 100}
+        rationale: 选择该模板的理由（必填）
+    """
+    data = parse_data_json(data_json)
+    log_tool_call("chart_combo", template, data_json, rationale, data)
+
+    # 验证 primaryValues
+    ok1, reason1 = validate_list_field(data, "primaryValues", min_len=2)
+    if not ok1:
+        return TemplateSelection(
+            category="chart",
+            sub_category="chart-combo",
+            template=None,
+            data=None,
+            rationale=f"数据不完整，无法渲染组合图：{reason1}",
+        )
+
+    # 验证 secondaryValues
+    ok2, reason2 = validate_list_field(data, "secondaryValues", min_len=2)
+    if not ok2:
+        return TemplateSelection(
+            category="chart",
+            sub_category="chart-combo",
+            template=None,
+            data=None,
+            rationale=f"数据不完整，无法渲染组合图：{reason2}",
+        )
+
+    return TemplateSelection(
+        category="chart",
+        sub_category="chart-combo",
         template=template,
         data=data,
         rationale=rationale,

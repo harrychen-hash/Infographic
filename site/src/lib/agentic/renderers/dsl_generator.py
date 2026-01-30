@@ -1,7 +1,7 @@
 """
 [INPUT]: TemplateSelection (template, data, category)
 [OUTPUT]: DSL 语法字符串
-[POS]: 将 Python 数据结构转换为 @antv/infographic DSL 格式
+[POS]: 将 Python 数据结构转换为 @antv/infographic DSL 格式（按官方 DataSchema）
 
 [PROTOCOL]:
 1. 一旦本文件逻辑变更，必须同步更新此 Header。
@@ -22,9 +22,75 @@ theme
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Iterable, List, Optional
 
 from ..config.palette import AI_COLOR_PALETTE
+
+DATA_KEY_ORDER = [
+    "title",
+    "desc",
+    "xTitle",           # chart 轴标题
+    "yTitle",           # chart 轴标题
+    "primaryYTitle",    # chart-combo: 左Y轴标题
+    "secondaryYTitle",  # chart-combo: 右Y轴标题
+    "primaryLabel",     # chart-combo: 左轴图例
+    "secondaryLabel",   # chart-combo: 右轴图例
+    "primaryMin",       # chart-combo: 左轴起始值
+    "primaryMax",       # chart-combo: 左轴最大值
+    "primaryStep",      # chart-combo: 左轴刻度间隔
+    "secondaryMin",     # chart-combo: 右轴起始值
+    "secondaryMax",     # chart-combo: 右轴最大值
+    "secondaryStep",    # chart-combo: 右轴刻度间隔
+    "items",
+    "lists",
+    "sequences",
+    "root",
+    "compares",
+    "nodes",
+    "relations",
+    "values",
+    "primaryValues",    # chart-combo: 柱状图数据（左轴）
+    "secondaryValues",  # chart-combo: 折线图数据（右轴）
+    "order",
+    "illus",
+    "attributes",
+]
+
+ITEM_KEY_ORDER = [
+    "id",
+    "label",
+    "value",
+    "desc",
+    "icon",
+    "illus",
+    "attributes",
+    "group",
+    "category",
+    "children",
+]
+
+RELATION_KEY_ORDER = [
+    "id",
+    "from",
+    "to",
+    "label",
+    "direction",
+    "showArrow",
+    "arrowType",
+]
+
+INLINE_KEY_PREFS = {
+    "items": ["label", "id", "value", "title"],
+    "lists": ["label", "id", "value", "title"],
+    "sequences": ["label", "id", "value", "title"],
+    "values": ["label", "id", "value", "title"],
+    "primaryValues": ["label", "id", "value", "title"],    # chart-combo
+    "secondaryValues": ["label", "id", "value", "title"],  # chart-combo
+    "compares": ["label", "id", "value", "title"],
+    "nodes": ["id", "label", "value", "title"],
+    "children": ["label", "id", "value", "title"],
+    "default": ["label", "id", "value", "title"],
+}
 
 
 def generate_dsl(
@@ -46,30 +112,13 @@ def generate_dsl(
     Returns:
         DSL 语法字符串
     """
+    # chart-combo 需要 values 占位字段以通过 isCompleteParsedInfographicOptions() 检查
+    if template == "chart-combo" and "values" not in data:
+        data = {**data, "values": [{"label": "placeholder", "value": 0}]}
+
     lines = [f"infographic {template}"]
     lines.append("data")
-
-    # 添加 title 和 desc
-    if title:
-        lines.append(f"  title {_escape_value(title)}")
-    if desc:
-        lines.append(f"  desc {_escape_value(desc)}")
-
-    # 根据 category 生成对应的 data 部分
-    if category == "chart":
-        lines.extend(_generate_chart_data(data))
-    elif category == "list":
-        lines.extend(_generate_list_data(data))
-    elif category == "sequence":
-        lines.extend(_generate_sequence_data(data))
-    elif category == "comparison":
-        lines.extend(_generate_compare_data(data))
-    elif category == "hierarchy":
-        lines.extend(_generate_hierarchy_data(data))
-    elif category == "relation":
-        lines.extend(_generate_relation_data(data))
-    elif category == "quadrant":
-        lines.extend(_generate_quadrant_data(data))
+    lines.extend(_generate_data_block(data, title=title, desc=desc))
 
     # 添加 theme
     lines.append("theme")
@@ -88,179 +137,180 @@ def _escape_value(value: str) -> str:
     return value.replace("\n", " ").replace("\r", "").strip()
 
 
-def _generate_chart_data(data: Dict[str, Any]) -> List[str]:
-    """生成 chart 类型的 data 部分
+def _generate_data_block(
+    data: Dict[str, Any],
+    title: Optional[str] = None,
+    desc: Optional[str] = None,
+) -> List[str]:
+    """生成 data 部分（按官方 DataSchema 渲染）"""
+    lines: List[str] = []
 
-    数据格式: {"values": [{"label": str, "value": num, "desc"?: str}]}
-    """
-    lines = []
-    values = data.get("values", [])
+    effective_title = title if title is not None else data.get("title")
+    effective_desc = desc if desc is not None else data.get("desc")
 
-    if values:
-        lines.append("  values")
-        for item in values:
-            lines.append(f"    - label {_escape_value(item.get('label', ''))}")
-            if "value" in item:
-                lines.append(f"      value {item['value']}")
-            if "desc" in item and item["desc"]:
-                lines.append(f"      desc {_escape_value(item['desc'])}")
+    if effective_title:
+        lines.append(f"  title {_format_scalar(effective_title)}")
+    if effective_desc:
+        lines.append(f"  desc {_format_scalar(effective_desc)}")
 
-    return lines
-
-
-def _generate_list_data(data: Dict[str, Any]) -> List[str]:
-    """生成 list 类型的 data 部分
-
-    数据格式: {"lists": [{"label": str, "desc"?: str, "icon"?: str}]}
-    """
-    lines = []
-    lists = data.get("lists", [])
-
-    if lists:
-        lines.append("  lists")
-        for item in lists:
-            lines.append(f"    - label {_escape_value(item.get('label', ''))}")
-            if "desc" in item and item["desc"]:
-                lines.append(f"      desc {_escape_value(item['desc'])}")
-            if "icon" in item and item["icon"]:
-                lines.append(f"      icon {item['icon']}")
-            if "value" in item:
-                lines.append(f"      value {item['value']}")
+    for key in DATA_KEY_ORDER:
+        if key in ("title", "desc"):
+            continue
+        if key not in data:
+            continue
+        _emit_key_value(lines, key, data.get(key), indent=2)
 
     return lines
 
 
-def _generate_sequence_data(data: Dict[str, Any]) -> List[str]:
-    """生成 sequence 类型的 data 部分
+def _emit_key_value(
+    lines: List[str],
+    key: str,
+    value: Any,
+    indent: int,
+) -> None:
+    if _is_empty(value):
+        return
 
-    数据格式: {"sequences": [{"label": str, "desc"?: str, "time"?: str}]}
-    """
-    lines = []
-    sequences = data.get("sequences", [])
-
-    if sequences:
-        lines.append("  sequences")
-        for item in sequences:
-            lines.append(f"    - label {_escape_value(item.get('label', ''))}")
-            if "desc" in item and item["desc"]:
-                lines.append(f"      desc {_escape_value(item['desc'])}")
-            if "time" in item and item["time"]:
-                lines.append(f"      time {item['time']}")
-            if "icon" in item and item["icon"]:
-                lines.append(f"      icon {item['icon']}")
-
-    return lines
-
-
-def _generate_compare_data(data: Dict[str, Any]) -> List[str]:
-    """生成 compare 类型的 data 部分
-
-    数据格式: {"compares": [{"label": str, "value"?: num, "children"?: [...]}]}
-    """
-    lines = []
-    compares = data.get("compares", [])
-
-    if compares:
-        lines.append("  compares")
-        for item in compares:
-            lines.append(f"    - label {_escape_value(item.get('label', ''))}")
-            if "value" in item:
-                lines.append(f"      value {item['value']}")
-            if "desc" in item and item["desc"]:
-                lines.append(f"      desc {_escape_value(item['desc'])}")
-            # 处理 children (用于 SWOT 等)
-            children = item.get("children", [])
-            if children:
-                lines.append("      children")
-                for child in children:
-                    if isinstance(child, dict):
-                        lines.append(f"        - label {_escape_value(child.get('label', ''))}")
-                    else:
-                        lines.append(f"        - label {_escape_value(str(child))}")
-
-    return lines
-
-
-def _generate_hierarchy_data(data: Dict[str, Any]) -> List[str]:
-    """生成 hierarchy 类型的 data 部分
-
-    数据格式: {"root": {"label": str, "children": [...]}}
-    """
-    lines = []
-    root = data.get("root", {})
-
-    if root:
-        lines.append("  root")
-        lines.extend(_generate_tree_node(root, indent=4))
-
-    return lines
-
-
-def _generate_tree_node(node: Dict[str, Any], indent: int) -> List[str]:
-    """递归生成树节点"""
-    lines = []
     prefix = " " * indent
+    if isinstance(value, list):
+        lines.append(f"{prefix}{key}")
+        _emit_list(lines, key, value, indent + 2)
+        return
 
-    lines.append(f"{prefix}label {_escape_value(node.get('label', ''))}")
+    if isinstance(value, dict):
+        lines.append(f"{prefix}{key}")
+        if key == "root":
+            _emit_object(lines, value, indent + 2, key_order=ITEM_KEY_ORDER)
+        else:
+            _emit_object(lines, value, indent + 2)
+        return
 
-    if "desc" in node and node["desc"]:
-        lines.append(f"{prefix}desc {_escape_value(node['desc'])}")
-
-    children = node.get("children", [])
-    if children:
-        lines.append(f"{prefix}children")
-        for child in children:
-            lines.append(f"{prefix}  - label {_escape_value(child.get('label', ''))}")
-            # 递归处理子节点的 children
-            sub_children = child.get("children", [])
-            if sub_children:
-                lines.append(f"{prefix}    children")
-                for sub in sub_children:
-                    if isinstance(sub, dict):
-                        lines.append(f"{prefix}      - label {_escape_value(sub.get('label', ''))}")
-                    else:
-                        lines.append(f"{prefix}      - label {_escape_value(str(sub))}")
-
-    return lines
+    lines.append(f"{prefix}{key} {_format_scalar(value)}")
 
 
-def _generate_relation_data(data: Dict[str, Any]) -> List[str]:
-    """生成 relation 类型的 data 部分
+def _emit_object(
+    lines: List[str],
+    obj: Dict[str, Any],
+    indent: int,
+    key_order: Optional[List[str]] = None,
+) -> None:
+    for key in _ordered_keys(obj, key_order):
+        _emit_key_value(lines, key, obj.get(key), indent)
 
-    数据格式: {
-        "nodes": [{"id": str, "label": str}],
-        "relations": [{"from": str, "to": str}] 或 ["A -> B", ...]
-    }
-    """
-    lines = []
-    nodes = data.get("nodes", [])
-    relations = data.get("relations", data.get("edges", []))
 
-    if nodes:
-        lines.append("  nodes")
-        for node in nodes:
-            lines.append(f"    - id {node.get('id', '')}")
-            lines.append(f"      label {_escape_value(node.get('label', ''))}")
-            if "desc" in node and node["desc"]:
-                lines.append(f"      desc {_escape_value(node['desc'])}")
+def _emit_list(
+    lines: List[str],
+    key: str,
+    items: Iterable[Any],
+    indent: int,
+) -> None:
+    if key == "relations":
+        _emit_relations(lines, items, indent)
+        return
 
-    if relations:
-        lines.append("  relations")
-        for rel in relations:
-            if isinstance(rel, dict):
-                # {"from": "A", "to": "B"}
-                lines.append(f"    {rel.get('from', '')} -> {rel.get('to', '')}")
+    for item in items:
+        if isinstance(item, dict):
+            inline_prefs = INLINE_KEY_PREFS.get(key, INLINE_KEY_PREFS["default"])
+            _emit_object_item(
+                lines,
+                item,
+                indent,
+                inline_prefs=inline_prefs,
+                key_order=ITEM_KEY_ORDER,
+            )
+        else:
+            lines.append(f"{' ' * indent}- {_format_scalar(item)}")
+
+
+def _emit_object_item(
+    lines: List[str],
+    item: Dict[str, Any],
+    indent: int,
+    inline_prefs: List[str],
+    key_order: Optional[List[str]] = None,
+) -> None:
+    inline_key = _pick_inline_key(item, inline_prefs)
+    prefix = " " * indent
+    if inline_key:
+        lines.append(
+            f"{prefix}- {inline_key} {_format_scalar(item.get(inline_key))}"
+        )
+    else:
+        lines.append(f"{prefix}-")
+
+    for key in _ordered_keys(item, key_order):
+        if key == inline_key:
+            continue
+        if key == "children" and isinstance(item.get(key), list):
+            _emit_key_value(lines, key, item.get(key), indent + 2)
+            continue
+        _emit_key_value(lines, key, item.get(key), indent + 2)
+
+
+def _emit_relations(lines: List[str], items: Iterable[Any], indent: int) -> None:
+    prefix = " " * indent
+    for rel in items:
+        if isinstance(rel, dict):
+            from_value = rel.get("from")
+            to_value = rel.get("to")
+            extra_keys = [k for k in rel.keys() if k not in ("from", "to")]
+            if (
+                from_value is not None
+                and to_value is not None
+                and not extra_keys
+            ):
+                lines.append(
+                    f"{prefix}{_format_scalar(from_value)} -> {_format_scalar(to_value)}"
+                )
             else:
-                # 字符串格式 "A -> B"
-                lines.append(f"    {rel}")
+                _emit_object_item(
+                    lines,
+                    rel,
+                    indent,
+                    inline_prefs=["from", "id", "label"],
+                    key_order=RELATION_KEY_ORDER,
+                )
+        else:
+            lines.append(f"{prefix}{_format_scalar(rel)}")
 
-    return lines
+
+def _is_empty(value: Any) -> bool:
+    if value is None:
+        return True
+    if isinstance(value, str) and not value.strip():
+        return True
+    if isinstance(value, (list, tuple, dict)) and len(value) == 0:
+        return True
+    return False
 
 
-def _generate_quadrant_data(data: Dict[str, Any]) -> List[str]:
-    """生成 quadrant 类型的 data 部分
+def _is_scalar(value: Any) -> bool:
+    return isinstance(value, (str, int, float, bool))
 
-    数据格式: {"compares": [{"label": str, "icon"?: str}]} (4 个象限)
-    """
-    # quadrant 使用 compares 字段，与 compare 类似
-    return _generate_compare_data(data)
+
+def _format_scalar(value: Any) -> str:
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (int, float)):
+        return str(value)
+    return _escape_value(str(value))
+
+
+def _pick_inline_key(item: Dict[str, Any], prefs: List[str]) -> Optional[str]:
+    for key in prefs:
+        if key in item and _is_scalar(item.get(key)) and not _is_empty(item.get(key)):
+            return key
+    for key in item.keys():
+        if _is_scalar(item.get(key)) and not _is_empty(item.get(key)):
+            return key
+    return None
+
+
+def _ordered_keys(obj: Dict[str, Any], preferred: Optional[List[str]]) -> List[str]:
+    keys = list(obj.keys())
+    if not preferred:
+        return keys
+    ordered = [key for key in preferred if key in obj]
+    ordered.extend([key for key in keys if key not in ordered])
+    return ordered

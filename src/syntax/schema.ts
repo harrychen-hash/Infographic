@@ -119,6 +119,12 @@ export const DesignSchema = object({
 export const DataSchema = object({
   title: string(),
   desc: string(),
+  xTitle: string(),                         // chart: X轴标题
+  yTitle: string(),                         // chart: Y轴标题
+  primaryYTitle: string(),                  // chart-combo: 左Y轴标题
+  secondaryYTitle: string(),                // chart-combo: 右Y轴标题
+  primaryLabel: string(),                   // chart-combo: 左轴图例
+  secondaryLabel: string(),                 // chart-combo: 右轴图例
   items: array(itemDatumSchema),
   lists: array(itemDatumSchema),
   sequences: array(itemDatumSchema),
@@ -127,6 +133,8 @@ export const DataSchema = object({
   nodes: array(itemDatumSchema),
   relations: array(RelationSchema),
   values: array(itemDatumSchema),
+  primaryValues: array(itemDatumSchema),    // chart-combo: 柱状图数据（左轴）
+  secondaryValues: array(itemDatumSchema),  // chart-combo: 折线图数据（右轴）
   order: enumOf(['asc', 'desc']),
   illus: anyObject(),
   attributes: anyObject(),
